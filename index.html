@@ -3,24 +3,26 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shopping List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Shopping Lists</title>
     <style>
         :root {
-            --bg: #0b1020;
-            --card: rgba(255, 255, 255, .06);
-            --card2: rgba(255, 255, 255, .09);
-            --stroke: rgba(255, 255, 255, .10);
-            --text: rgba(255, 255, 255, .92);
-            --muted: rgba(255, 255, 255, .65);
-            --accent: #7c5cff;
-            --good: #3ddc97;
-            --bad: #ff4d6d;
-            --shadow: 0 14px 50px rgba(0, 0, 0, .35);
+            --bg: #f2f2f7;
+            --card: rgba(255, 255, 255, 0.86);
+            --cardSolid: #ffffff;
+            --text: #1c1c1e;
+            --subtext: #6b6b75;
+            --line: rgba(60, 60, 67, 0.18);
+            --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+            --shadowSm: 0 6px 18px rgba(0, 0, 0, 0.06);
+            --blue: #007aff;
+            --green: #34c759;
+            --red: #ff3b30;
+            --orange: #ff9500;
             --radius: 18px;
-            --radius2: 14px;
-            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            --radiusSm: 14px;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         * {
@@ -34,934 +36,1132 @@
 
         body {
             margin: 0;
-            font-family: var(--sans);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(900px 600px at 10% 10%, rgba(124, 92, 255, .35), transparent 60%),
-                radial-gradient(900px 600px at 90% 20%, rgba(61, 220, 151, .20), transparent 60%),
-                radial-gradient(900px 700px at 50% 95%, rgba(255, 77, 109, .14), transparent 65%),
-                linear-gradient(180deg, #060916, var(--bg));
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            padding: 26px 14px;
+                radial-gradient(1200px 700px at 50% -10%, rgba(0, 122, 255, 0.14), transparent 60%),
+                radial-gradient(900px 520px at 110% 20%, rgba(52, 199, 89, 0.10), transparent 60%),
+                radial-gradient(900px 520px at -10% 50%, rgba(255, 149, 0, 0.10), transparent 60%),
+                var(--bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
-        .wrap {
-            width: min(980px, 100%);
-            display: grid;
-            gap: 18px;
-            grid-template-columns: 1fr;
-        }
-
-        header {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            justify-content: space-between;
-            padding: 18px 18px 14px;
-            border-radius: var(--radius);
-            background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .05));
-            border: 1px solid var(--stroke);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-        }
-
-        .title {
+        .app {
+            min-height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
 
-        .title h1 {
-            margin: 0;
-            font-size: 20px;
-            letter-spacing: .2px;
+        /* Top bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: calc(10px + var(--safe-top)) 14px 10px;
+            background: rgba(242, 242, 247, 0.72);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(60, 60, 67, 0.12);
         }
 
-        .title p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.35;
-        }
-
-        .stats {
-            display: flex;
+        .toprow {
+            display: grid;
+            grid-template-columns: 1fr auto;
             gap: 10px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
             align-items: center;
         }
 
-        .chip {
-            font-size: 12px;
-            padding: 8px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--stroke);
-            background: rgba(255, 255, 255, .04);
-            color: var(--muted);
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            white-space: nowrap;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            display: inline-block;
-            background: var(--accent);
-            box-shadow: 0 0 0 3px rgba(124, 92, 255, .18);
-        }
-
-        .dot.good {
-            background: var(--good);
-            box-shadow: 0 0 0 3px rgba(61, 220, 151, .18);
-        }
-
-        .dot.bad {
-            background: var(--bad);
-            box-shadow: 0 0 0 3px rgba(255, 77, 109, .16);
-        }
-
-        .panel {
-            border-radius: var(--radius);
-            background: rgba(255, 255, 255, .05);
-            border: 1px solid var(--stroke);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-        }
-
-        .controls {
-            padding: 14px;
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-            border-bottom: 1px solid var(--stroke);
-            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
-        }
-
-        .row {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-        }
-
-        @media (min-width: 860px) {
-            .row {
-                grid-template-columns: 1.2fr .55fr .65fr auto;
-                align-items: end;
-            }
-
-            .controls {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                padding: 18px;
-            }
-        }
-
-        label {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        input,
-        select,
-        button {
-            font: inherit;
-            color: var(--text);
-            outline: none;
-        }
-
-        input,
-        select {
-            width: 100%;
-            border-radius: 14px;
-            border: 1px solid var(--stroke);
-            background: rgba(255, 255, 255, .04);
-            padding: 12px 12px;
-            transition: border-color .15s ease, background .15s ease, transform .06s ease;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: rgba(124, 92, 255, .55);
-            background: rgba(255, 255, 255, .06);
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            border: 1px solid var(--stroke);
-            background: rgba(255, 255, 255, .05);
-            padding: 11px 12px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: transform .06s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
-            user-select: none;
-        }
-
-        button:hover {
-            background: rgba(255, 255, 255, .08);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .primary {
-            border-color: rgba(124, 92, 255, .55);
-            background: rgba(124, 92, 255, .18);
-        }
-
-        .primary:hover {
-            background: rgba(124, 92, 255, .24);
-        }
-
-        .danger {
-            border-color: rgba(255, 77, 109, .55);
-            background: rgba(255, 77, 109, .12);
-        }
-
-        .danger:hover {
-            background: rgba(255, 77, 109, .18);
-        }
-
-        .toolbar {
-            padding: 12px 14px;
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-            border-bottom: 1px solid var(--stroke);
-        }
-
-        @media (min-width: 860px) {
-            .toolbar {
-                grid-template-columns: 1fr .75fr .65fr;
-                align-items: center;
-            }
-        }
-
-        .segmented {
-            display: flex;
-            border: 1px solid var(--stroke);
-            border-radius: 14px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, .03);
-        }
-
-        .segmented button {
-            border: 0;
-            border-right: 1px solid var(--stroke);
-            border-radius: 0;
-            padding: 10px 12px;
-            background: transparent;
-            color: var(--muted);
-            flex: 1;
-        }
-
-        .segmented button:last-child {
-            border-right: 0;
-        }
-
-        .segmented button[aria-pressed="true"] {
-            background: rgba(255, 255, 255, .08);
-            color: var(--text);
-        }
-
-        .list {
-            padding: 10px 10px 12px;
-        }
-
-        .empty {
-            padding: 26px 14px;
-            color: var(--muted);
-            text-align: center;
-            border: 1px dashed rgba(255, 255, 255, .16);
-            border-radius: var(--radius2);
-            margin: 8px 4px;
-        }
-
-        .item {
-            display: grid;
-            grid-template-columns: 34px 1fr auto;
-            gap: 10px;
-            align-items: center;
-            padding: 10px 10px;
-            margin: 8px 4px;
-            border: 1px solid rgba(255, 255, 255, .10);
-            border-radius: var(--radius2);
-            background: rgba(255, 255, 255, .04);
-        }
-
-        .item:hover {
-            background: rgba(255, 255, 255, .06);
-        }
-
-        .drag {
-            width: 34px;
-            height: 34px;
-            display: grid;
-            place-items: center;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, .10);
-            background: rgba(255, 255, 255, .03);
-            cursor: grab;
-            user-select: none;
-            font-family: var(--mono);
-            color: rgba(255, 255, 255, .55);
-        }
-
-        .meta {
+        .titlewrap {
             display: flex;
             flex-direction: column;
             gap: 2px;
             min-width: 0;
         }
 
-        .nameRow {
+        .title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--subtext);
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(60, 60, 67, 0.14);
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+            max-width: 52vw;
+        }
+
+        .pill select {
+            border: none;
+            background: transparent;
+            font: inherit;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            outline: none;
+            max-width: 44vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 18px;
+            cursor: pointer;
+        }
+
+        .chev {
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid rgba(60, 60, 67, 0.5);
+            border-bottom: 2px solid rgba(60, 60, 67, 0.5);
+            transform: rotate(45deg);
+            margin-left: -14px;
+            pointer-events: none;
+        }
+
+        .iconbtn {
+            border: none;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(60, 60, 67, 0.14);
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
+            cursor: pointer;
+            transition: transform .08s ease, filter .18s ease;
+        }
+
+        .iconbtn:active {
+            transform: scale(0.98);
+            filter: brightness(0.98);
+        }
+
+        /* Content */
+        .content {
+            padding: 14px;
             display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            padding-bottom: calc(20px + var(--safe-bottom));
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(60, 60, 67, 0.12);
+            border-radius: var(--radius);
+            box-shadow: var(--shadowSm);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        .cardHeader {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .cardHeader h2 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        .muted {
+            color: var(--subtext);
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        /* Inputs */
+        .form {
+            padding: 12px 14px 14px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            color: var(--subtext);
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(60, 60, 67, 0.16);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 12px 12px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+        }
+
+        input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            transition: transform .08s ease, filter .18s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btnPrimary {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 10px 22px rgba(0, 122, 255, 0.22);
+        }
+
+        .btnGhost {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(60, 60, 67, 0.16);
+            color: var(--text);
+        }
+
+        .btnDanger {
+            background: rgba(255, 59, 48, 0.12);
+            border: 1px solid rgba(255, 59, 48, 0.20);
+            color: var(--red);
+            font-weight: 800;
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+            filter: brightness(0.98);
+        }
+
+        .seg {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(60, 60, 67, 0.14);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72) inset;
+        }
+
+        .seg button {
+            border: none;
+            background: transparent;
+            padding: 10px 12px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            color: var(--subtext);
+        }
+
+        .seg button.active {
+            background: rgba(0, 122, 255, 0.12);
+            color: var(--blue);
+        }
+
+        /* List */
+        .list {
+            display: grid;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 24px 1fr auto;
             gap: 10px;
             align-items: center;
-            min-width: 0;
+            padding: 12px 14px;
+            border-top: 1px solid rgba(60, 60, 67, 0.10);
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .item:first-child {
+            border-top: none;
         }
 
         .check {
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, .20);
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 1.5px solid rgba(60, 60, 67, 0.30);
             display: grid;
             place-items: center;
-            background: rgba(255, 255, 255, .02);
             cursor: pointer;
-            flex: 0 0 auto;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset;
         }
 
         .check svg {
             opacity: 0;
-            transform: scale(.9);
+            transform: scale(0.8);
             transition: opacity .12s ease, transform .12s ease;
         }
 
-        .item[data-done="true"] .check {
-            border-color: rgba(61, 220, 151, .55);
-            background: rgba(61, 220, 151, .12);
+        .item.done .check {
+            border-color: rgba(52, 199, 89, 0.45);
+            background: rgba(52, 199, 89, 0.16);
         }
 
-        .item[data-done="true"] .check svg {
+        .item.done .check svg {
             opacity: 1;
             transform: scale(1);
         }
 
+        .text {
+            min-width: 0;
+            display: grid;
+            gap: 2px;
+        }
+
         .name {
-            font-weight: 650;
-            letter-spacing: .2px;
+            font-weight: 750;
+            letter-spacing: -0.012em;
+            font-size: 15px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .item[data-done="true"] .name {
-            text-decoration: line-through;
-            color: rgba(255, 255, 255, .62);
-            font-weight: 600;
-        }
-
-        .sub {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            color: var(--muted);
+        .meta {
             font-size: 12px;
+            color: var(--subtext);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, .12);
-            background: rgba(255, 255, 255, .03);
+        .item.done .name {
+            color: rgba(28, 28, 30, 0.55);
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+        }
+
+        .itemBtns {
             display: inline-flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .badge b {
-            color: rgba(255, 255, 255, .84);
-            font-weight: 650;
-        }
-
-        .right {
-            display: flex;
             gap: 8px;
             align-items: center;
-            justify-content: flex-end;
         }
 
-        .iconbtn {
-            width: 36px;
-            height: 36px;
-            border-radius: 14px;
+        .mini {
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(60, 60, 67, 0.14);
             display: grid;
             place-items: center;
-            padding: 0;
+            cursor: pointer;
+            transition: transform .08s ease, filter .18s ease;
         }
 
-        .iconbtn svg {
-            opacity: .85;
+        .mini:active {
+            transform: scale(0.98);
+            filter: brightness(0.98);
         }
 
-        .iconbtn:hover svg {
-            opacity: 1;
+        .empty {
+            padding: 18px 14px;
+            text-align: center;
+            color: var(--subtext);
+            font-size: 14px;
         }
 
-        .iconbtn.danger:hover {
-            border-color: rgba(255, 77, 109, .65);
+        /* Modal */
+        .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.26);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px;
+            padding-bottom: calc(12px + var(--safe-bottom));
+            z-index: 50;
         }
 
-        .hint {
-            padding: 0 14px 14px;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.4;
+        .backdrop.show {
+            display: flex;
         }
 
-        .hint kbd {
-            font-family: var(--mono);
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, .14);
-            background: rgba(255, 255, 255, .04);
-            color: rgba(255, 255, 255, .85);
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
+        .sheet {
+            width: min(520px, 100%);
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(60, 60, 67, 0.12);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
             overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        }
+
+        .sheetHeader {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .sheetHeader .grab {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 46px;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(60, 60, 67, 0.22);
+            top: 8px;
+        }
+
+        .sheetHeader h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: -0.015em;
+        }
+
+        .sheetBody {
+            padding: 12px 14px 14px;
+            display: grid;
+            gap: 12px;
+        }
+
+        /* Desktop polish */
+        @media (min-width: 720px) {
+            .content {
+                width: 680px;
+                margin: 0 auto;
+            }
+
+            .topbar {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .toprow {
+                width: 680px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
         }
     </style>
 </head>
 
 <body>
-    <main class="wrap">
-        <header>
-            <div class="title">
-                <h1>Shopping List</h1>
-                <p>Add items, tick them off, and keep everything saved on this device.</p>
-            </div>
-            <div class="stats" aria-live="polite">
-                <div class="chip" title="Total items"><span class="dot"></span><span id="statTotal">0 total</span></div>
-                <div class="chip" title="Active items"><span class="dot bad"></span><span id="statActive">0
-                        active</span></div>
-                <div class="chip" title="Bought items"><span class="dot good"></span><span id="statDone">0 bought</span>
+    <div class="app" role="application" aria-label="Shopping lists">
+        <header class="topbar">
+            <div class="toprow">
+                <div class="titlewrap">
+                    <div class="title">Shopping Lists</div>
+                    <div class="subtitle" id="subtitle">Organize lists by store</div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <div class="pill" aria-label="Store picker">
+                        <select id="storeSelect" aria-label="Select store"></select>
+                        <div class="chev" aria-hidden="true"></div>
+                    </div>
+                    <button class="iconbtn" id="openStoreSheet" aria-label="Manage stores" title="Manage stores">
+                        <!-- sliders icon -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M6 21v-7m0-4V3m12 18v-9m0-4V3" stroke="rgba(28,28,30,.82)" stroke-width="2"
+                                stroke-linecap="round" />
+                            <path d="M3 14h6M15 12h6" stroke="rgba(28,28,30,.82)" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <section class="panel" aria-label="Shopping list app">
-            <div class="controls">
-                <div class="row">
-                    <label>
-                        Item
-                        <input id="itemName" type="text" placeholder="e.g., Bananas" maxlength="60" />
-                    </label>
-
-                    <label>
-                        Qty
-                        <input id="itemQty" type="number" inputmode="numeric" min="1" step="1" value="1" />
-                    </label>
-
-                    <label>
-                        Category
-                        <input id="itemCat" type="text" placeholder="e.g., Produce" maxlength="30" />
-                    </label>
-
+        <main class="content">
+            <section class="card" aria-label="Add item">
+                <div class="cardHeader">
+                    <div>
+                        <h2>Add Item</h2>
+                        <div class="muted">Quickly add items to the selected store</div>
+                    </div>
+                    <div class="seg" aria-label="View mode">
+                        <button id="modeAll" class="active" type="button">All</button>
+                        <button id="modeOpen" type="button">To Buy</button>
+                    </div>
+                </div>
+                <form class="form" id="addForm" autocomplete="off">
+                    <div class="row">
+                        <div class="field">
+                            <label for="itemName">Item</label>
+                            <input id="itemName" type="text" placeholder="e.g., Milk" required />
+                        </div>
+                    </div>
                     <div class="actions">
-                        <button id="addBtn" class="primary" type="button">Add</button>
-                        <button id="clearBoughtBtn" class="danger" type="button" title="Remove all bought items">Clear
-                            bought</button>
+                        <div class="field">
+                            <label for="itemQty">Qty (optional)</label>
+                            <input id="itemQty" type="number" inputmode="numeric" min="1" placeholder="1" />
+                        </div>
+                        <button class="btn btnPrimary" type="submit" aria-label="Add item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                            </svg>
+                            Add
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card" aria-label="List items">
+                <div class="cardHeader">
+                    <div>
+                        <h2 id="listTitle">List</h2>
+                        <div class="muted" id="listMeta">0 items</div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btnGhost" id="clearDone" type="button" title="Clear checked"
+                            aria-label="Clear checked items">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M9 11l2 2 4-4" stroke="rgba(28,28,30,.82)" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="rgba(28,28,30,.35)"
+                                    stroke-width="1.5" />
+                            </svg>
+                            Clear
+                        </button>
                     </div>
                 </div>
-            </div>
+                <div class="list" id="list"></div>
+                <div class="empty" id="empty" hidden>
+                    Nothing here yet. Add your first item above.
+                </div>
+            </section>
 
-            <div class="toolbar">
-                <label>
-                    Search
-                    <input id="search" type="text" placeholder="Type to filter items…" />
-                </label>
-
-                <div>
-                    <span class="sr-only">Filter</span>
-                    <div class="segmented" role="group" aria-label="Filter items">
-                        <button type="button" data-filter="all" aria-pressed="true">All</button>
-                        <button type="button" data-filter="active" aria-pressed="false">Active</button>
-                        <button type="button" data-filter="done" aria-pressed="false">Bought</button>
+            <section class="card" aria-label="Tips">
+                <div class="cardHeader">
+                    <div>
+                        <h2>Tips</h2>
+                        <div class="muted">Tap the checkbox to mark items done</div>
                     </div>
                 </div>
-
-                <label>
-                    Sort
-                    <select id="sort">
-                        <option value="manual">Manual (drag)</option>
-                        <option value="name">Name</option>
-                        <option value="category">Category</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="list" id="list" aria-label="Items"></div>
-
-            <div class="hint">
-                Tips: Press <kbd>Enter</kbd> to add. Drag the <kbd>::</kbd> handle to reorder (Manual sort).
-                Double-click an item to edit.
-            </div>
-        </section>
-    </main>
-
-    <template id="itemTpl">
-        <div class="item" draggable="true">
-            <div class="drag" title="Drag to reorder" aria-hidden="true">::</div>
-
-            <div class="meta">
-                <div class="nameRow">
-                    <div class="check" role="checkbox" aria-checked="false" tabindex="0" title="Mark as bought">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
-                        </svg>
-                    </div>
-                    <div class="name"></div>
+                <div style="padding: 12px 14px 14px; color: var(--subtext); font-size: 13px; line-height: 1.4;">
+                    <div>• Your lists save automatically on this device.</div>
+                    <div>• Use <b>To Buy</b> to hide checked items.</div>
+                    <div>• Manage store names from the top right button.</div>
                 </div>
-                <div class="sub"></div>
-            </div>
+            </section>
+        </main>
+    </div>
 
-            <div class="right">
-                <button class="iconbtn" data-action="edit" title="Edit">
+    <!-- Store Management Sheet -->
+    <div class="backdrop" id="storeBackdrop" role="dialog" aria-modal="true" aria-label="Manage stores"
+        aria-hidden="true">
+        <div class="sheet" role="document">
+            <div class="sheetHeader" style="position: relative;">
+                <div class="grab" aria-hidden="true"></div>
+                <h3>Stores</h3>
+                <button class="mini" id="closeStoreSheet" aria-label="Close">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M6 6l12 12M18 6 6 18" stroke="rgba(28,28,30,.72)" stroke-width="2.5"
+                            stroke-linecap="round" />
                     </svg>
                 </button>
-                <button class="iconbtn danger" data-action="delete" title="Delete">
+            </div>
+            <div class="sheetBody">
+                <div class="field">
+                    <label for="newStore">New store name</label>
+                    <input id="newStore" type="text" placeholder="e.g., Trader Joe’s" />
+                </div>
+                <button class="btn btnPrimary" id="addStore" type="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <path d="M7 6l1 15h8l1-15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.5" stroke-linecap="round" />
                     </svg>
+                    Add Store
+                </button>
+
+                <div class="card" style="background: rgba(255,255,255,0.6);">
+                    <div class="cardHeader">
+                        <div>
+                            <h2 style="font-size:14px;">Manage</h2>
+                            <div class="muted">Rename or delete stores</div>
+                        </div>
+                    </div>
+                    <div id="storeList"></div>
+                </div>
+
+                <button class="btn btnDanger" id="resetAll" type="button" title="Remove all stores and items">
+                    Reset All Data
                 </button>
             </div>
         </div>
-    </template>
+    </div>
 
     <script>
-        // ---------- State ----------
-        const STORAGE_KEY = "modern-shopping-list.v1";
+        /**
+         * Apple-ish Shopping Lists (single-file)
+         * - Stores with user-defined names
+         * - Items per store with quantity + done
+         * - Filter: All vs To Buy
+         * - localStorage persistence
+         */
 
-        /** @type {{id:string,name:string,qty:number,cat:string,done:boolean,order:number,createdAt:number}[]} */
-        let items = load();
+        const STORAGE_KEY = "appleish_shopping_lists_v1";
 
-        let filter = "all";       // all | active | done
-        let query = "";
-        let sortMode = "manual";  // manual | name | category
+        /** @typedef {{ id:string, name:string, items: Item[] }} Store */
+        /** @typedef {{ id:string, name:string, qty:number|null, done:boolean, createdAt:number }} Item */
 
-        // ---------- Elements ----------
-        const elName = document.querySelector("#itemName");
-        const elQty = document.querySelector("#itemQty");
-        const elCat = document.querySelector("#itemCat");
-        const elAdd = document.querySelector("#addBtn");
-        const elClearBought = document.querySelector("#clearBoughtBtn");
+        const $ = (sel, root = document) => root.querySelector(sel);
+        const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-        const elSearch = document.querySelector("#search");
-        const elSort = document.querySelector("#sort");
-        const elList = document.querySelector("#list");
-        const tpl = document.querySelector("#itemTpl");
+        const els = {
+            storeSelect: $("#storeSelect"),
+            subtitle: $("#subtitle"),
+            listTitle: $("#listTitle"),
+            listMeta: $("#listMeta"),
+            list: $("#list"),
+            empty: $("#empty"),
+            addForm: $("#addForm"),
+            itemName: $("#itemName"),
+            itemQty: $("#itemQty"),
+            clearDone: $("#clearDone"),
+            modeAll: $("#modeAll"),
+            modeOpen: $("#modeOpen"),
 
-        const statTotal = document.querySelector("#statTotal");
-        const statActive = document.querySelector("#statActive");
-        const statDone = document.querySelector("#statDone");
+            openStoreSheet: $("#openStoreSheet"),
+            storeBackdrop: $("#storeBackdrop"),
+            closeStoreSheet: $("#closeStoreSheet"),
+            newStore: $("#newStore"),
+            addStore: $("#addStore"),
+            storeList: $("#storeList"),
+            resetAll: $("#resetAll"),
+        };
 
-        // ---------- Helpers ----------
-        function uid() {
-            return Math.random().toString(16).slice(2) + Date.now().toString(16);
-        }
+        const uid = () => Math.random().toString(16).slice(2) + Date.now().toString(16);
 
-        function save() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-        }
+        const defaultData = () => ({
+            selectedStoreId: null,
+            viewMode: "all", // all | open
+            stores: [
+                {
+                    id: uid(),
+                    name: "Grocery",
+                    items: [
+                        { id: uid(), name: "Milk", qty: 1, done: false, createdAt: Date.now() - 300000 },
+                        { id: uid(), name: "Eggs", qty: 12, done: false, createdAt: Date.now() - 250000 },
+                        { id: uid(), name: "Bananas", qty: 6, done: true, createdAt: Date.now() - 200000 },
+                    ]
+                },
+                {
+                    id: uid(),
+                    name: "Pharmacy",
+                    items: [
+                        { id: uid(), name: "Toothpaste", qty: 1, done: false, createdAt: Date.now() - 150000 },
+                    ]
+                }
+            ]
+        });
 
         function load() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
-                const parsed = raw ? JSON.parse(raw) : [];
-                if (!Array.isArray(parsed)) return [];
-                // Basic cleanup / defaults
-                return parsed.map((x, i) => ({
-                    id: String(x.id ?? uid()),
-                    name: String(x.name ?? "").trim(),
-                    qty: Number.isFinite(+x.qty) ? Math.max(1, Math.floor(+x.qty)) : 1,
-                    cat: String(x.cat ?? "").trim(),
-                    done: !!x.done,
-                    order: Number.isFinite(+x.order) ? +x.order : i,
-                    createdAt: Number.isFinite(+x.createdAt) ? +x.createdAt : Date.now()
-                })).filter(x => x.name.length);
+                if (!raw) return defaultData();
+                const data = JSON.parse(raw);
+                // basic shape guard
+                if (!data || !Array.isArray(data.stores)) return defaultData();
+                return data;
             } catch {
-                return [];
+                return defaultData();
             }
         }
 
-        function normalize(s) {
-            return (s ?? "").toString().trim().toLowerCase();
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
 
-        function compareStr(a, b) {
-            return a.localeCompare(b, undefined, { sensitivity: "base" });
+        let state = load();
+        if (!state.selectedStoreId && state.stores[0]) state.selectedStoreId = state.stores[0].id;
+
+        function currentStore() {
+            return state.stores.find(s => s.id === state.selectedStoreId) || state.stores[0] || null;
         }
 
-        function sortedView(list) {
-            const copy = [...list];
-
-            if (sortMode === "manual") {
-                copy.sort((a, b) => a.order - b.order);
-            } else if (sortMode === "name") {
-                copy.sort((a, b) => compareStr(a.name, b.name) || (a.createdAt - b.createdAt));
-            } else if (sortMode === "category") {
-                copy.sort((a, b) => compareStr(a.cat || "zzzz", b.cat || "zzzz") || compareStr(a.name, b.name));
+        function setSubtitle() {
+            const s = currentStore();
+            if (!s) {
+                els.subtitle.textContent = "No stores yet";
+                return;
             }
-
-            // Always keep done items after active items (nice UX)
-            copy.sort((a, b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
-
-            return copy;
+            const open = s.items.filter(i => !i.done).length;
+            els.subtitle.textContent = `${open} to buy • Saved on this device`;
         }
 
-        function visibleItems() {
-            const q = normalize(query);
-            return items.filter(it => {
-                const matchesFilter =
-                    filter === "all" ||
-                    (filter === "active" && !it.done) ||
-                    (filter === "done" && it.done);
+        function setMode(mode) {
+            state.viewMode = mode;
+            els.modeAll.classList.toggle("active", mode === "all");
+            els.modeOpen.classList.toggle("active", mode === "open");
+            save();
+            render();
+        }
 
-                if (!matchesFilter) return false;
-
-                if (!q) return true;
-                const hay = `${it.name} ${it.cat} ${it.qty}`.toLowerCase();
-                return hay.includes(q);
+        function renderStoreSelect() {
+            const s = currentStore();
+            els.storeSelect.innerHTML = "";
+            state.stores.forEach(store => {
+                const opt = document.createElement("option");
+                opt.value = store.id;
+                opt.textContent = store.name;
+                if (s && store.id === s.id) opt.selected = true;
+                els.storeSelect.appendChild(opt);
             });
+
+            els.storeSelect.disabled = state.stores.length === 0;
         }
 
-        function setStats() {
-            const total = items.length;
-            const done = items.filter(i => i.done).length;
-            const active = total - done;
-            statTotal.textContent = `${total} total`;
-            statActive.textContent = `${active} active`;
-            statDone.textContent = `${done} bought`;
-        }
+        function renderItems() {
+            const s = currentStore();
+            els.list.innerHTML = "";
 
-        function focusName() {
-            elName.focus();
-            elName.select?.();
-        }
-
-        // ---------- CRUD ----------
-        function addItem() {
-            const name = elName.value.trim();
-            const qty = Math.max(1, Math.floor(+elQty.value || 1));
-            const cat = elCat.value.trim();
-
-            if (!name) {
-                focusName();
+            if (!s) {
+                els.listTitle.textContent = "List";
+                els.listMeta.textContent = "0 items";
+                els.empty.hidden = false;
                 return;
             }
 
-            const newItem = {
-                id: uid(),
-                name,
-                qty,
-                cat,
-                done: false,
-                order: nextOrder(),
-                createdAt: Date.now()
-            };
+            const all = [...s.items].sort((a, b) => {
+                // open first, then newest
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                return b.createdAt - a.createdAt;
+            });
 
-            items.unshift(newItem); // newest on top (but manual order controls)
-            // re-normalize order values if in manual mode
-            if (sortMode === "manual") normalizeOrder();
+            const shown = state.viewMode === "open" ? all.filter(i => !i.done) : all;
+
+            const total = s.items.length;
+            const open = s.items.filter(i => !i.done).length;
+            els.listTitle.textContent = s.name;
+            els.listMeta.textContent = `${total} item${total === 1 ? "" : "s"} • ${open} to buy`;
+
+            els.empty.hidden = shown.length !== 0;
+
+            shown.forEach(item => {
+                const row = document.createElement("div");
+                row.className = "item" + (item.done ? " done" : "");
+                row.dataset.id = item.id;
+
+                const check = document.createElement("button");
+                check.className = "check";
+                check.type = "button";
+                check.ariaLabel = item.done ? "Mark not done" : "Mark done";
+                check.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" stroke="rgba(28,28,30,.82)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+                check.addEventListener("click", () => toggleDone(item.id));
+
+                const text = document.createElement("div");
+                text.className = "text";
+
+                const name = document.createElement("div");
+                name.className = "name";
+                name.textContent = item.name;
+
+                const meta = document.createElement("div");
+                meta.className = "meta";
+                meta.textContent = item.qty ? `Qty: ${item.qty}` : "";
+
+                text.appendChild(name);
+                text.appendChild(meta);
+
+                const btns = document.createElement("div");
+                btns.className = "itemBtns";
+
+                const editBtn = document.createElement("button");
+                editBtn.className = "mini";
+                editBtn.type = "button";
+                editBtn.title = "Edit";
+                editBtn.ariaLabel = "Edit item";
+                editBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 20h9" stroke="rgba(28,28,30,.7)" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="rgba(28,28,30,.7)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+                editBtn.addEventListener("click", () => editItem(item.id));
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "mini";
+                delBtn.type = "button";
+                delBtn.title = "Delete";
+                delBtn.ariaLabel = "Delete item";
+                delBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 7h12" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M8 7l1 14h6l1-14" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+                delBtn.addEventListener("click", () => deleteItem(item.id));
+
+                btns.appendChild(editBtn);
+                btns.appendChild(delBtn);
+
+                row.appendChild(check);
+                row.appendChild(text);
+                row.appendChild(btns);
+
+                els.list.appendChild(row);
+            });
+        }
+
+        function renderStoreManager() {
+            els.storeList.innerHTML = "";
+
+            if (state.stores.length === 0) {
+                els.storeList.innerHTML = `<div class="empty">Add a store to get started.</div>`;
+                return;
+            }
+
+            state.stores.forEach(store => {
+                const row = document.createElement("div");
+                row.className = "item";
+                row.style.gridTemplateColumns = "1fr auto";
+
+                const left = document.createElement("div");
+                left.className = "text";
+                left.style.gap = "3px";
+
+                const name = document.createElement("div");
+                name.className = "name";
+                name.textContent = store.name;
+
+                const meta = document.createElement("div");
+                meta.className = "meta";
+                const open = store.items.filter(i => !i.done).length;
+                meta.textContent = `${store.items.length} item${store.items.length === 1 ? "" : "s"} • ${open} to buy`;
+
+                left.appendChild(name);
+                left.appendChild(meta);
+
+                const btns = document.createElement("div");
+                btns.className = "itemBtns";
+
+                const renameBtn = document.createElement("button");
+                renameBtn.className = "mini";
+                renameBtn.type = "button";
+                renameBtn.title = "Rename";
+                renameBtn.ariaLabel = "Rename store";
+                renameBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8L17.3 5.5a2 2 0 0 0-2.8 0L4 16v4Z" stroke="rgba(28,28,30,.7)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.5 6.5l4 4" stroke="rgba(28,28,30,.7)" stroke-width="2.3" stroke-linecap="round"/>
+          </svg>
+        `;
+                renameBtn.addEventListener("click", () => renameStore(store.id));
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "mini";
+                delBtn.type = "button";
+                delBtn.title = "Delete";
+                delBtn.ariaLabel = "Delete store";
+                delBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 7h12" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M8 7l1 14h6l1-14" stroke="rgba(255,59,48,.9)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+                delBtn.addEventListener("click", () => deleteStore(store.id));
+
+                const pickBtn = document.createElement("button");
+                pickBtn.className = "mini";
+                pickBtn.type = "button";
+                pickBtn.title = "Select";
+                pickBtn.ariaLabel = "Select store";
+                pickBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" stroke="rgba(52,199,89,.95)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+                pickBtn.addEventListener("click", () => {
+                    state.selectedStoreId = store.id;
+                    save();
+                    render();
+                    closeStores();
+                });
+
+                btns.appendChild(pickBtn);
+                btns.appendChild(renameBtn);
+                btns.appendChild(delBtn);
+
+                row.appendChild(left);
+                row.appendChild(btns);
+
+                els.storeList.appendChild(row);
+            });
+        }
+
+        function render() {
+            renderStoreSelect();
+            renderItems();
+            renderStoreManager();
+            setSubtitle();
+
+            // disable clear button if no done items
+            const s = currentStore();
+            const anyDone = s ? s.items.some(i => i.done) : false;
+            els.clearDone.disabled = !anyDone;
+            els.clearDone.style.opacity = anyDone ? "1" : "0.55";
+
+            // focus add field when list exists
+            if (state.stores.length > 0) els.itemName.placeholder = `e.g., Milk (${currentStore().name})`;
+            else els.itemName.placeholder = "Add a store first";
+
+            // disable add form if no stores
+            const disabled = state.stores.length === 0;
+            els.itemName.disabled = disabled;
+            els.itemQty.disabled = disabled;
+            els.addForm.querySelector("button[type=submit]").disabled = disabled;
+            els.addForm.querySelector("button[type=submit]").style.opacity = disabled ? "0.6" : "1";
+
+            // view mode buttons reflect state
+            els.modeAll.classList.toggle("active", state.viewMode === "all");
+            els.modeOpen.classList.toggle("active", state.viewMode === "open");
+        }
+
+        // Actions
+        function addItem(name, qty) {
+            const s = currentStore();
+            if (!s) return;
+            s.items.push({ id: uid(), name: name.trim(), qty: qty ?? null, done: false, createdAt: Date.now() });
             save();
             render();
-
-            elName.value = "";
-            elQty.value = "1";
-            elCat.value = "";
-            focusName();
         }
 
-        function nextOrder() {
-            // smaller order means higher on list
-            const min = items.reduce((m, it) => Math.min(m, it.order), 0);
-            return min - 1;
-        }
-
-        function normalizeOrder() {
-            // Assign order based on current manual visual order (active first, then done)
-            const view = sortedView(items);
-            view.forEach((it, idx) => it.order = idx);
-        }
-
-        function toggleDone(id) {
-            const it = items.find(x => x.id === id);
+        function toggleDone(itemId) {
+            const s = currentStore();
+            if (!s) return;
+            const it = s.items.find(i => i.id === itemId);
             if (!it) return;
             it.done = !it.done;
             save();
             render();
         }
 
-        function removeItem(id) {
-            items = items.filter(x => x.id !== id);
+        function deleteItem(itemId) {
+            const s = currentStore();
+            if (!s) return;
+            s.items = s.items.filter(i => i.id !== itemId);
             save();
             render();
         }
 
-        function clearBought() {
-            items = items.filter(x => !x.done);
-            save();
-            render();
-        }
-
-        function editItem(id) {
-            const it = items.find(x => x.id === id);
+        function editItem(itemId) {
+            const s = currentStore();
+            if (!s) return;
+            const it = s.items.find(i => i.id === itemId);
             if (!it) return;
 
-            const newName = prompt("Edit item name:", it.name);
-            if (newName === null) return; // canceled
+            const newName = prompt("Edit item name", it.name);
+            if (newName === null) return;
+            const trimmed = newName.trim();
+            if (!trimmed) return;
 
-            const name = newName.trim();
-            if (!name) return;
-
-            const newQtyRaw = prompt("Edit quantity:", String(it.qty));
+            const newQtyRaw = prompt("Edit quantity (leave blank for none)", it.qty ?? "");
             if (newQtyRaw === null) return;
-            const qty = Math.max(1, Math.floor(+newQtyRaw || 1));
+            const q = String(newQtyRaw).trim();
+            const parsed = q === "" ? null : Math.max(1, parseInt(q, 10));
 
-            const newCat = prompt("Edit category (optional):", it.cat);
-            if (newCat === null) return;
-            const cat = newCat.trim();
-
-            it.name = name;
-            it.qty = qty;
-            it.cat = cat;
-
+            it.name = trimmed;
+            it.qty = Number.isFinite(parsed) ? parsed : null;
             save();
             render();
         }
 
-        // ---------- Rendering ----------
-        function render() {
-            setStats();
-
-            const view = sortedView(visibleItems());
-            elList.innerHTML = "";
-
-            if (view.length === 0) {
-                const empty = document.createElement("div");
-                empty.className = "empty";
-                empty.textContent = items.length ? "No items match your filters." : "Your list is empty — add your first item above.";
-                elList.appendChild(empty);
-                return;
-            }
-
-            for (const it of view) {
-                const node = tpl.content.firstElementChild.cloneNode(true);
-                node.dataset.id = it.id;
-                node.dataset.done = String(it.done);
-
-                node.querySelector(".name").textContent = it.name;
-
-                const sub = node.querySelector(".sub");
-                sub.innerHTML = "";
-                const qtyBadge = document.createElement("span");
-                qtyBadge.className = "badge";
-                qtyBadge.innerHTML = `Qty <b>${it.qty}</b>`;
-                sub.appendChild(qtyBadge);
-
-                if (it.cat) {
-                    const catBadge = document.createElement("span");
-                    catBadge.className = "badge";
-                    catBadge.innerHTML = `Cat <b>${escapeHtml(it.cat)}</b>`;
-                    sub.appendChild(catBadge);
-                }
-
-                const check = node.querySelector(".check");
-                check.setAttribute("aria-checked", String(it.done));
-
-                // Disable drag when not manual sort (keeps UX predictable)
-                node.draggable = (sortMode === "manual");
-                node.querySelector(".drag").style.opacity = (sortMode === "manual") ? "1" : ".35";
-                node.querySelector(".drag").style.cursor = (sortMode === "manual") ? "grab" : "not-allowed";
-
-                elList.appendChild(node);
-            }
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, (m) => ({
-                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-            }[m]));
-        }
-
-        // ---------- Events ----------
-        elAdd.addEventListener("click", addItem);
-
-        elName.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") addItem();
-        });
-
-        elClearBought.addEventListener("click", clearBought);
-
-        elSearch.addEventListener("input", (e) => {
-            query = e.target.value;
+        function clearDone() {
+            const s = currentStore();
+            if (!s) return;
+            s.items = s.items.filter(i => !i.done);
+            save();
             render();
+        }
+
+        function addStore(name) {
+            const trimmed = name.trim();
+            if (!trimmed) return;
+            const store = { id: uid(), name: trimmed, items: [] };
+            state.stores.unshift(store);
+            state.selectedStoreId = store.id;
+            save();
+            render();
+        }
+
+        function renameStore(storeId) {
+            const store = state.stores.find(s => s.id === storeId);
+            if (!store) return;
+            const next = prompt("Rename store", store.name);
+            if (next === null) return;
+            const trimmed = next.trim();
+            if (!trimmed) return;
+            store.name = trimmed;
+            save();
+            render();
+        }
+
+        function deleteStore(storeId) {
+            const store = state.stores.find(s => s.id === storeId);
+            if (!store) return;
+
+            const ok = confirm(`Delete \"${store.name}\" and its items?`);
+            if (!ok) return;
+
+            state.stores = state.stores.filter(s => s.id !== storeId);
+            if (state.selectedStoreId === storeId) {
+                state.selectedStoreId = state.stores[0]?.id ?? null;
+            }
+            save();
+            render();
+        }
+
+        function resetAll() {
+            const ok = confirm("Reset all stores and items on this device?");
+            if (!ok) return;
+            state = defaultData();
+            state.selectedStoreId = state.stores[0]?.id ?? null;
+            save();
+            render();
+            closeStores();
+        }
+
+        // Sheet open/close
+        function openStores() {
+            els.storeBackdrop.classList.add("show");
+            els.storeBackdrop.setAttribute("aria-hidden", "false");
+            setTimeout(() => els.newStore.focus(), 50);
+        }
+
+        function closeStores() {
+            els.storeBackdrop.classList.remove("show");
+            els.storeBackdrop.setAttribute("aria-hidden", "true");
+            els.openStoreSheet.focus();
+        }
+
+        // Events
+        els.addForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const name = els.itemName.value;
+            const qtyRaw = els.itemQty.value.trim();
+            const qty = qtyRaw ? Math.max(1, parseInt(qtyRaw, 10)) : null;
+
+            if (!name.trim()) return;
+            addItem(name, Number.isFinite(qty) ? qty : null);
+
+            els.itemName.value = "";
+            els.itemQty.value = "";
+            els.itemName.focus();
         });
 
-        elSort.addEventListener("change", (e) => {
-            sortMode = e.target.value;
-            if (sortMode === "manual") normalizeOrder();
+        els.storeSelect.addEventListener("change", () => {
+            state.selectedStoreId = els.storeSelect.value;
             save();
             render();
         });
 
-        document.querySelectorAll(".segmented button").forEach(btn => {
-            btn.addEventListener("click", () => {
-                filter = btn.dataset.filter;
-                document.querySelectorAll(".segmented button").forEach(b => {
-                    b.setAttribute("aria-pressed", String(b === btn));
-                });
-                render();
-            });
+        els.clearDone.addEventListener("click", clearDone);
+
+        els.modeAll.addEventListener("click", () => setMode("all"));
+        els.modeOpen.addEventListener("click", () => setMode("open"));
+
+        els.openStoreSheet.addEventListener("click", openStores);
+        els.closeStoreSheet.addEventListener("click", closeStores);
+
+        els.addStore.addEventListener("click", () => {
+            addStore(els.newStore.value);
+            els.newStore.value = "";
+            els.newStore.focus();
         });
 
-        // Delegate item actions
-        elList.addEventListener("click", (e) => {
-            const itemEl = e.target.closest(".item");
-            if (!itemEl) return;
-            const id = itemEl.dataset.id;
-
-            const actionBtn = e.target.closest("button[data-action]");
-            if (actionBtn) {
-                const action = actionBtn.dataset.action;
-                if (action === "delete") removeItem(id);
-                if (action === "edit") editItem(id);
-                return;
-            }
-
-            const check = e.target.closest(".check");
-            if (check) {
-                toggleDone(id);
-                return;
-            }
-        });
-
-        // Keyboard toggle on checkbox
-        elList.addEventListener("keydown", (e) => {
-            const check = e.target.closest(".check");
-            if (!check) return;
-            if (e.key === "Enter" || e.key === " ") {
+        els.newStore.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
                 e.preventDefault();
-                const itemEl = e.target.closest(".item");
-                if (!itemEl) return;
-                toggleDone(itemEl.dataset.id);
+                els.addStore.click();
             }
         });
 
-        // Double click to edit
-        elList.addEventListener("dblclick", (e) => {
-            const itemEl = e.target.closest(".item");
-            if (!itemEl) return;
-            editItem(itemEl.dataset.id);
+        els.resetAll.addEventListener("click", resetAll);
+
+        // Backdrop click closes
+        els.storeBackdrop.addEventListener("click", (e) => {
+            if (e.target === els.storeBackdrop) closeStores();
         });
 
-        // Drag + Drop for manual ordering
-        let dragId = null;
-
-        elList.addEventListener("dragstart", (e) => {
-            const itemEl = e.target.closest(".item");
-            if (!itemEl || sortMode !== "manual") return;
-            dragId = itemEl.dataset.id;
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/plain", dragId);
-            itemEl.style.opacity = ".65";
+        // Escape closes sheet
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && els.storeBackdrop.classList.contains("show")) closeStores();
         });
 
-        elList.addEventListener("dragend", (e) => {
-            const itemEl = e.target.closest(".item");
-            if (itemEl) itemEl.style.opacity = "1";
-            dragId = null;
-        });
-
-        elList.addEventListener("dragover", (e) => {
-            if (sortMode !== "manual") return;
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
-        });
-
-        elList.addEventListener("drop", (e) => {
-            if (sortMode !== "manual") return;
-            e.preventDefault();
-
-            const fromId = e.dataTransfer.getData("text/plain") || dragId;
-            const toEl = e.target.closest(".item");
-            if (!fromId || !toEl) return;
-
-            const toId = toEl.dataset.id;
-            if (fromId === toId) return;
-
-            // Reorder only within the currently visible list
-            const view = sortedView(visibleItems());
-            const fromIdx = view.findIndex(x => x.id === fromId);
-            const toIdx = view.findIndex(x => x.id === toId);
-            if (fromIdx < 0 || toIdx < 0) return;
-
-            const moved = view.splice(fromIdx, 1)[0];
-            view.splice(toIdx, 0, moved);
-
-            // Write back order to items for those in view; keep others as-is
-            const orderMap = new Map(view.map((it, idx) => [it.id, idx]));
-            for (const it of items) {
-                if (orderMap.has(it.id)) it.order = orderMap.get(it.id);
-            }
-
-            save();
-            render();
-        });
-
-        // ---------- Init ----------
-        // Ensure stable order values at first run
-        if (items.some(x => !Number.isFinite(x.order))) normalizeOrder();
+        // Initial render
         render();
-        focusName();
     </script>
 </body>
 
