@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shopping List</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --card: rgba(255, 255, 255, .06);
+            --card2: rgba(255, 255, 255, .09);
+            --stroke: rgba(255, 255, 255, .10);
+            --text: rgba(255, 255, 255, .92);
+            --muted: rgba(255, 255, 255, .65);
+            --accent: #7c5cff;
+            --good: #3ddc97;
+            --bad: #ff4d6d;
+            --shadow: 0 14px 50px rgba(0, 0, 0, .35);
+            --radius: 18px;
+            --radius2: 14px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            color: var(--text);
+            background:
+                radial-gradient(900px 600px at 10% 10%, rgba(124, 92, 255, .35), transparent 60%),
+                radial-gradient(900px 600px at 90% 20%, rgba(61, 220, 151, .20), transparent 60%),
+                radial-gradient(900px 700px at 50% 95%, rgba(255, 77, 109, .14), transparent 65%),
+                linear-gradient(180deg, #060916, var(--bg));
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            padding: 26px 14px;
+        }
+
+        .wrap {
+            width: min(980px, 100%);
+            display: grid;
+            gap: 18px;
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 18px 18px 14px;
+            border-radius: var(--radius);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .05));
+            border: 1px solid var(--stroke);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .title h1 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: .2px;
+        }
+
+        .title p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .chip {
+            font-size: 12px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            color: var(--muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            display: inline-block;
+            background: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 92, 255, .18);
+        }
+
+        .dot.good {
+            background: var(--good);
+            box-shadow: 0 0 0 3px rgba(61, 220, 151, .18);
+        }
+
+        .dot.bad {
+            background: var(--bad);
+            box-shadow: 0 0 0 3px rgba(255, 77, 109, .16);
+        }
+
+        .panel {
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--stroke);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .controls {
+            padding: 14px;
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+            border-bottom: 1px solid var(--stroke);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+        }
+
+        .row {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 860px) {
+            .row {
+                grid-template-columns: 1.2fr .55fr .65fr auto;
+                align-items: end;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 18px;
+            }
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        input,
+        select,
+        button {
+            font: inherit;
+            color: var(--text);
+            outline: none;
+        }
+
+        input,
+        select {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .04);
+            padding: 12px 12px;
+            transition: border-color .15s ease, background .15s ease, transform .06s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(124, 92, 255, .55);
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, .05);
+            padding: 11px 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform .06s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+            user-select: none;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, .08);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .primary {
+            border-color: rgba(124, 92, 255, .55);
+            background: rgba(124, 92, 255, .18);
+        }
+
+        .primary:hover {
+            background: rgba(124, 92, 255, .24);
+        }
+
+        .danger {
+            border-color: rgba(255, 77, 109, .55);
+            background: rgba(255, 77, 109, .12);
+        }
+
+        .danger:hover {
+            background: rgba(255, 77, 109, .18);
+        }
+
+        .toolbar {
+            padding: 12px 14px;
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        @media (min-width: 860px) {
+            .toolbar {
+                grid-template-columns: 1fr .75fr .65fr;
+                align-items: center;
+            }
+        }
+
+        .segmented {
+            display: flex;
+            border: 1px solid var(--stroke);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, .03);
+        }
+
+        .segmented button {
+            border: 0;
+            border-right: 1px solid var(--stroke);
+            border-radius: 0;
+            padding: 10px 12px;
+            background: transparent;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .segmented button:last-child {
+            border-right: 0;
+        }
+
+        .segmented button[aria-pressed="true"] {
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+        }
+
+        .list {
+            padding: 10px 10px 12px;
+        }
+
+        .empty {
+            padding: 26px 14px;
+            color: var(--muted);
+            text-align: center;
+            border: 1px dashed rgba(255, 255, 255, .16);
+            border-radius: var(--radius2);
+            margin: 8px 4px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 34px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 10px;
+            margin: 8px 4px;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: var(--radius2);
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .drag {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .10);
+            background: rgba(255, 255, 255, .03);
+            cursor: grab;
+            user-select: none;
+            font-family: var(--mono);
+            color: rgba(255, 255, 255, .55);
+        }
+
+        .meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .nameRow {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .check {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, .20);
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, .02);
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .check svg {
+            opacity: 0;
+            transform: scale(.9);
+            transition: opacity .12s ease, transform .12s ease;
+        }
+
+        .item[data-done="true"] .check {
+            border-color: rgba(61, 220, 151, .55);
+            background: rgba(61, 220, 151, .12);
+        }
+
+        .item[data-done="true"] .check svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .name {
+            font-weight: 650;
+            letter-spacing: .2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item[data-done="true"] .name {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, .62);
+            font-weight: 600;
+        }
+
+        .sub {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .03);
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .badge b {
+            color: rgba(255, 255, 255, .84);
+            font-weight: 650;
+        }
+
+        .right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .iconbtn {
+            width: 36px;
+            height: 36px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+        }
+
+        .iconbtn svg {
+            opacity: .85;
+        }
+
+        .iconbtn:hover svg {
+            opacity: 1;
+        }
+
+        .iconbtn.danger:hover {
+            border-color: rgba(255, 77, 109, .65);
+        }
+
+        .hint {
+            padding: 0 14px 14px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .hint kbd {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .04);
+            color: rgba(255, 255, 255, .85);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap">
+        <header>
+            <div class="title">
+                <h1>Shopping List</h1>
+                <p>Add items, tick them off, and keep everything saved on this device.</p>
+            </div>
+            <div class="stats" aria-live="polite">
+                <div class="chip" title="Total items"><span class="dot"></span><span id="statTotal">0 total</span></div>
+                <div class="chip" title="Active items"><span class="dot bad"></span><span id="statActive">0
+                        active</span></div>
+                <div class="chip" title="Bought items"><span class="dot good"></span><span id="statDone">0 bought</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="panel" aria-label="Shopping list app">
+            <div class="controls">
+                <div class="row">
+                    <label>
+                        Item
+                        <input id="itemName" type="text" placeholder="e.g., Bananas" maxlength="60" />
+                    </label>
+
+                    <label>
+                        Qty
+                        <input id="itemQty" type="number" inputmode="numeric" min="1" step="1" value="1" />
+                    </label>
+
+                    <label>
+                        Category
+                        <input id="itemCat" type="text" placeholder="e.g., Produce" maxlength="30" />
+                    </label>
+
+                    <div class="actions">
+                        <button id="addBtn" class="primary" type="button">Add</button>
+                        <button id="clearBoughtBtn" class="danger" type="button" title="Remove all bought items">Clear
+                            bought</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <label>
+                    Search
+                    <input id="search" type="text" placeholder="Type to filter items…" />
+                </label>
+
+                <div>
+                    <span class="sr-only">Filter</span>
+                    <div class="segmented" role="group" aria-label="Filter items">
+                        <button type="button" data-filter="all" aria-pressed="true">All</button>
+                        <button type="button" data-filter="active" aria-pressed="false">Active</button>
+                        <button type="button" data-filter="done" aria-pressed="false">Bought</button>
+                    </div>
+                </div>
+
+                <label>
+                    Sort
+                    <select id="sort">
+                        <option value="manual">Manual (drag)</option>
+                        <option value="name">Name</option>
+                        <option value="category">Category</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="list" id="list" aria-label="Items"></div>
+
+            <div class="hint">
+                Tips: Press <kbd>Enter</kbd> to add. Drag the <kbd>::</kbd> handle to reorder (Manual sort).
+                Double-click an item to edit.
+            </div>
+        </section>
+    </main>
+
+    <template id="itemTpl">
+        <div class="item" draggable="true">
+            <div class="drag" title="Drag to reorder" aria-hidden="true">::</div>
+
+            <div class="meta">
+                <div class="nameRow">
+                    <div class="check" role="checkbox" aria-checked="false" tabindex="0" title="Mark as bought">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
+                    <div class="name"></div>
+                </div>
+                <div class="sub"></div>
+            </div>
+
+            <div class="right">
+                <button class="iconbtn" data-action="edit" title="Edit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <button class="iconbtn danger" data-action="delete" title="Delete">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M7 6l1 15h8l1-15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // ---------- State ----------
+        const STORAGE_KEY = "modern-shopping-list.v1";
+
+        /** @type {{id:string,name:string,qty:number,cat:string,done:boolean,order:number,createdAt:number}[]} */
+        let items = load();
+
+        let filter = "all";       // all | active | done
+        let query = "";
+        let sortMode = "manual";  // manual | name | category
+
+        // ---------- Elements ----------
+        const elName = document.querySelector("#itemName");
+        const elQty = document.querySelector("#itemQty");
+        const elCat = document.querySelector("#itemCat");
+        const elAdd = document.querySelector("#addBtn");
+        const elClearBought = document.querySelector("#clearBoughtBtn");
+
+        const elSearch = document.querySelector("#search");
+        const elSort = document.querySelector("#sort");
+        const elList = document.querySelector("#list");
+        const tpl = document.querySelector("#itemTpl");
+
+        const statTotal = document.querySelector("#statTotal");
+        const statActive = document.querySelector("#statActive");
+        const statDone = document.querySelector("#statDone");
+
+        // ---------- Helpers ----------
+        function uid() {
+            return Math.random().toString(16).slice(2) + Date.now().toString(16);
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        }
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(parsed)) return [];
+                // Basic cleanup / defaults
+                return parsed.map((x, i) => ({
+                    id: String(x.id ?? uid()),
+                    name: String(x.name ?? "").trim(),
+                    qty: Number.isFinite(+x.qty) ? Math.max(1, Math.floor(+x.qty)) : 1,
+                    cat: String(x.cat ?? "").trim(),
+                    done: !!x.done,
+                    order: Number.isFinite(+x.order) ? +x.order : i,
+                    createdAt: Number.isFinite(+x.createdAt) ? +x.createdAt : Date.now()
+                })).filter(x => x.name.length);
+            } catch {
+                return [];
+            }
+        }
+
+        function normalize(s) {
+            return (s ?? "").toString().trim().toLowerCase();
+        }
+
+        function compareStr(a, b) {
+            return a.localeCompare(b, undefined, { sensitivity: "base" });
+        }
+
+        function sortedView(list) {
+            const copy = [...list];
+
+            if (sortMode === "manual") {
+                copy.sort((a, b) => a.order - b.order);
+            } else if (sortMode === "name") {
+                copy.sort((a, b) => compareStr(a.name, b.name) || (a.createdAt - b.createdAt));
+            } else if (sortMode === "category") {
+                copy.sort((a, b) => compareStr(a.cat || "zzzz", b.cat || "zzzz") || compareStr(a.name, b.name));
+            }
+
+            // Always keep done items after active items (nice UX)
+            copy.sort((a, b) => (a.done === b.done) ? 0 : (a.done ? 1 : -1));
+
+            return copy;
+        }
+
+        function visibleItems() {
+            const q = normalize(query);
+            return items.filter(it => {
+                const matchesFilter =
+                    filter === "all" ||
+                    (filter === "active" && !it.done) ||
+                    (filter === "done" && it.done);
+
+                if (!matchesFilter) return false;
+
+                if (!q) return true;
+                const hay = `${it.name} ${it.cat} ${it.qty}`.toLowerCase();
+                return hay.includes(q);
+            });
+        }
+
+        function setStats() {
+            const total = items.length;
+            const done = items.filter(i => i.done).length;
+            const active = total - done;
+            statTotal.textContent = `${total} total`;
+            statActive.textContent = `${active} active`;
+            statDone.textContent = `${done} bought`;
+        }
+
+        function focusName() {
+            elName.focus();
+            elName.select?.();
+        }
+
+        // ---------- CRUD ----------
+        function addItem() {
+            const name = elName.value.trim();
+            const qty = Math.max(1, Math.floor(+elQty.value || 1));
+            const cat = elCat.value.trim();
+
+            if (!name) {
+                focusName();
+                return;
+            }
+
+            const newItem = {
+                id: uid(),
+                name,
+                qty,
+                cat,
+                done: false,
+                order: nextOrder(),
+                createdAt: Date.now()
+            };
+
+            items.unshift(newItem); // newest on top (but manual order controls)
+            // re-normalize order values if in manual mode
+            if (sortMode === "manual") normalizeOrder();
+            save();
+            render();
+
+            elName.value = "";
+            elQty.value = "1";
+            elCat.value = "";
+            focusName();
+        }
+
+        function nextOrder() {
+            // smaller order means higher on list
+            const min = items.reduce((m, it) => Math.min(m, it.order), 0);
+            return min - 1;
+        }
+
+        function normalizeOrder() {
+            // Assign order based on current manual visual order (active first, then done)
+            const view = sortedView(items);
+            view.forEach((it, idx) => it.order = idx);
+        }
+
+        function toggleDone(id) {
+            const it = items.find(x => x.id === id);
+            if (!it) return;
+            it.done = !it.done;
+            save();
+            render();
+        }
+
+        function removeItem(id) {
+            items = items.filter(x => x.id !== id);
+            save();
+            render();
+        }
+
+        function clearBought() {
+            items = items.filter(x => !x.done);
+            save();
+            render();
+        }
+
+        function editItem(id) {
+            const it = items.find(x => x.id === id);
+            if (!it) return;
+
+            const newName = prompt("Edit item name:", it.name);
+            if (newName === null) return; // canceled
+
+            const name = newName.trim();
+            if (!name) return;
+
+            const newQtyRaw = prompt("Edit quantity:", String(it.qty));
+            if (newQtyRaw === null) return;
+            const qty = Math.max(1, Math.floor(+newQtyRaw || 1));
+
+            const newCat = prompt("Edit category (optional):", it.cat);
+            if (newCat === null) return;
+            const cat = newCat.trim();
+
+            it.name = name;
+            it.qty = qty;
+            it.cat = cat;
+
+            save();
+            render();
+        }
+
+        // ---------- Rendering ----------
+        function render() {
+            setStats();
+
+            const view = sortedView(visibleItems());
+            elList.innerHTML = "";
+
+            if (view.length === 0) {
+                const empty = document.createElement("div");
+                empty.className = "empty";
+                empty.textContent = items.length ? "No items match your filters." : "Your list is empty — add your first item above.";
+                elList.appendChild(empty);
+                return;
+            }
+
+            for (const it of view) {
+                const node = tpl.content.firstElementChild.cloneNode(true);
+                node.dataset.id = it.id;
+                node.dataset.done = String(it.done);
+
+                node.querySelector(".name").textContent = it.name;
+
+                const sub = node.querySelector(".sub");
+                sub.innerHTML = "";
+                const qtyBadge = document.createElement("span");
+                qtyBadge.className = "badge";
+                qtyBadge.innerHTML = `Qty <b>${it.qty}</b>`;
+                sub.appendChild(qtyBadge);
+
+                if (it.cat) {
+                    const catBadge = document.createElement("span");
+                    catBadge.className = "badge";
+                    catBadge.innerHTML = `Cat <b>${escapeHtml(it.cat)}</b>`;
+                    sub.appendChild(catBadge);
+                }
+
+                const check = node.querySelector(".check");
+                check.setAttribute("aria-checked", String(it.done));
+
+                // Disable drag when not manual sort (keeps UX predictable)
+                node.draggable = (sortMode === "manual");
+                node.querySelector(".drag").style.opacity = (sortMode === "manual") ? "1" : ".35";
+                node.querySelector(".drag").style.cursor = (sortMode === "manual") ? "grab" : "not-allowed";
+
+                elList.appendChild(node);
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, (m) => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+            }[m]));
+        }
+
+        // ---------- Events ----------
+        elAdd.addEventListener("click", addItem);
+
+        elName.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") addItem();
+        });
+
+        elClearBought.addEventListener("click", clearBought);
+
+        elSearch.addEventListener("input", (e) => {
+            query = e.target.value;
+            render();
+        });
+
+        elSort.addEventListener("change", (e) => {
+            sortMode = e.target.value;
+            if (sortMode === "manual") normalizeOrder();
+            save();
+            render();
+        });
+
+        document.querySelectorAll(".segmented button").forEach(btn => {
+            btn.addEventListener("click", () => {
+                filter = btn.dataset.filter;
+                document.querySelectorAll(".segmented button").forEach(b => {
+                    b.setAttribute("aria-pressed", String(b === btn));
+                });
+                render();
+            });
+        });
+
+        // Delegate item actions
+        elList.addEventListener("click", (e) => {
+            const itemEl = e.target.closest(".item");
+            if (!itemEl) return;
+            const id = itemEl.dataset.id;
+
+            const actionBtn = e.target.closest("button[data-action]");
+            if (actionBtn) {
+                const action = actionBtn.dataset.action;
+                if (action === "delete") removeItem(id);
+                if (action === "edit") editItem(id);
+                return;
+            }
+
+            const check = e.target.closest(".check");
+            if (check) {
+                toggleDone(id);
+                return;
+            }
+        });
+
+        // Keyboard toggle on checkbox
+        elList.addEventListener("keydown", (e) => {
+            const check = e.target.closest(".check");
+            if (!check) return;
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                const itemEl = e.target.closest(".item");
+                if (!itemEl) return;
+                toggleDone(itemEl.dataset.id);
+            }
+        });
+
+        // Double click to edit
+        elList.addEventListener("dblclick", (e) => {
+            const itemEl = e.target.closest(".item");
+            if (!itemEl) return;
+            editItem(itemEl.dataset.id);
+        });
+
+        // Drag + Drop for manual ordering
+        let dragId = null;
+
+        elList.addEventListener("dragstart", (e) => {
+            const itemEl = e.target.closest(".item");
+            if (!itemEl || sortMode !== "manual") return;
+            dragId = itemEl.dataset.id;
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", dragId);
+            itemEl.style.opacity = ".65";
+        });
+
+        elList.addEventListener("dragend", (e) => {
+            const itemEl = e.target.closest(".item");
+            if (itemEl) itemEl.style.opacity = "1";
+            dragId = null;
+        });
+
+        elList.addEventListener("dragover", (e) => {
+            if (sortMode !== "manual") return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+        });
+
+        elList.addEventListener("drop", (e) => {
+            if (sortMode !== "manual") return;
+            e.preventDefault();
+
+            const fromId = e.dataTransfer.getData("text/plain") || dragId;
+            const toEl = e.target.closest(".item");
+            if (!fromId || !toEl) return;
+
+            const toId = toEl.dataset.id;
+            if (fromId === toId) return;
+
+            // Reorder only within the currently visible list
+            const view = sortedView(visibleItems());
+            const fromIdx = view.findIndex(x => x.id === fromId);
+            const toIdx = view.findIndex(x => x.id === toId);
+            if (fromIdx < 0 || toIdx < 0) return;
+
+            const moved = view.splice(fromIdx, 1)[0];
+            view.splice(toIdx, 0, moved);
+
+            // Write back order to items for those in view; keep others as-is
+            const orderMap = new Map(view.map((it, idx) => [it.id, idx]));
+            for (const it of items) {
+                if (orderMap.has(it.id)) it.order = orderMap.get(it.id);
+            }
+
+            save();
+            render();
+        });
+
+        // ---------- Init ----------
+        // Ensure stable order values at first run
+        if (items.some(x => !Number.isFinite(x.order))) normalizeOrder();
+        render();
+        focusName();
+    </script>
+</body>
+
+</html>
